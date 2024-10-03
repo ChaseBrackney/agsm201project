@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define MAX_DATA_SIZE 1000
+
+// Function prototypes
+void readData(const char *filename, double data[], int *size);
+double calculateMean(double data[], int size);
+double calculateMedian(double data[], int size);
+double calculateStandardDeviation(double data[], int size, double mean);
+
+int compare(const void *a, const void *b) {
+    return (*(double *)a - *(double *)b);
+}
+
+int main() {
+    double data[MAX_DATA_SIZE];
+    int size = 0;
+
+    // Read data from a CSV file
+    readData("data.csv", data, &size);
+
+    // Calculate statistics
+    double mean = calculateMean(data, size);
+    double median = calculateMedian(data, size);
+    double stddev = calculateStandardDeviation(data, size, mean);
+
+    // Print results
+    printf("Mean: %.2f\n", mean);
+    printf("Median: %.2f\n", median);
+    printf("Standard Deviation: %.2f\n", stddev);
+
+    return 0;
+}
+
+void readData(const char *filename, double data[], int *size) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+
+    while (fscanf(file, "%lf", &data[*size]) != EOF) {
+        (*size)++;
+    }
+
+    fclose(file);
+}
+
+double calculateMean(double data[], int size) {
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        sum += data[i];
+    }
+    return sum / size;
+}
+
+double calculateMedian(double data[], int size) {
+    qsort(data, size, sizeof(double), compare);
+    if (size % 2 == 0) {
+        return (data[size / 2 - 1] + data[size / 2]) / 2.0;
+    } else {
+        return data[size / 2];
+    }
+}
+
+double calculateStandardDeviation(double data[], int size, double mean) {
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        sum += (data[i] - mean) * (data[i] - mean);
+    }
+    return sqrt(sum / size);
+}
